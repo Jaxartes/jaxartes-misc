@@ -27,3 +27,29 @@ Running:
 History:
     Started writing in June 2013, with enhancements in 2013, 2014, and 2019.
     Added to "jaxartes-misc" package, July 2020.
+Compatibility:
+    Mostly tested on macOS.  Should also be fine on Linux and various
+    other systems.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Program: "tty-clock"
+Function:
+    Draws a clock and calendar within the terminal window.
+Files:
+    tty-clock.c - source code
+    tty-clock-ftctest.py - analyze some of the test output
+Compiling:
+    cc -Wall -o tty-clock tty-clock.c -lm -lcurses
+Running:
+    Run on the command line as "tty-clock".  When you're tired of it,
+    stop it with control-C.
+    Takes a few options.  If you run it with the "-\?" option it'll show
+    you what these options are.
+History:
+    Written in June and July 2020.  Added to "jaxartes-misc" package,
+    July 2020.
+Compatibility:
+    Tested on macOS and Raspbian Linux.
+    Should also be fine in most modern POSIX environments.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -5,5 +5,25 @@ for Linux and other POSIX-compatible systems.
 This file, "jaxartes-misc.txt" provides basic documentation about each
 one.  See the individual files for more details.
 
-No programs yet; soon!
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Program: "timedumper"
+Function:
+    Dumps some stuff to standard output continuously.  Mostly it's just
+    for filler.  The contents are:
+        a line count
+        current time stamp
+        24-bit linear feedback shift register (LFSR)
+        64-bit linear feedback shift register (LFSR)
+Files:
+    timedumper.c - source code
+Compiling:
+    cc -Wall -o timedumper timedumper.c
+Running:
+    Run on the command line as "timedumper".  When you're tired of it,
+    stop it with control-C.
+    It takes a few options:
+        -c -- color output
+        -q -- try to only use about 25% of a CPU, by taking breaks
+History:
+    Started writing in June 2013, with enhancements in 2013, 2014, and 2019.
+    Added to "jaxartes-misc" package, July 2020.

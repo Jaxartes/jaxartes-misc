@@ -1,0 +1,9 @@
+Introduction
+'jaxartes-misc' is a collection of open source programs.  Most are
+command line utilities by Jeremy Dilatush published under the BSD license
+for Linux and other POSIX-compatible systems.
+This file, "jaxartes-misc.txt" provides basic documentation about each
+one.  See the individual files for more details.
+
+No programs yet; soon!
+

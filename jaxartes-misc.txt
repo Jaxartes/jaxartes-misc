@@ -56,7 +56,7 @@ Compatibility:
 
 Program: "tvalentine"
 Function:
-    Really a toy.  Maybe of interest when "tty-clock" shows Feburary 14.
+    Really a toy.  Maybe of interest when "tty-clock" shows February 14.
 Files:
     tvalentine.c - source code
     tvalentine_gen.py - used to generate a bitmap included in tvalentine.c

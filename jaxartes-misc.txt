@@ -53,3 +53,21 @@ Compatibility:
     Should also be fine in most modern POSIX environments.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Program: "tvalentine"
+Function:
+    Really a toy.  Maybe of interest when "tty-clock" shows Feburary 14.
+Files:
+    tvalentine.c - source code
+    tvalentine_gen.py - used to generate a bitmap included in tvalentine.c
+Compiling:
+    cc -Wall -o tvalentine tvalentine.c -lcurses
+Running:
+    Run on the command line as "tvalentine".  Run within a terminal that
+    can do color.  Most can, nowadays.  When you're tired of it,
+    stop it with control-C or with "q".
+History:
+    Written in July 2020.
+Compatibility:
+    Tested on macOS.
+    Should also be fine in most modern POSIX environments.

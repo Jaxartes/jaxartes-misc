@@ -39,7 +39,7 @@
 #include <locale.h>
 #include <curses.h>
 
-/*** *** *** image data *** *** ***/
+/* image data */
 
 #define IMG_XOFF 16 /* horizontal offset */
 #define IMG_XDIM 48 /* horizontal size */

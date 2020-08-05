@@ -40,6 +40,8 @@ Files:
     tty-clock-ftctest.py - analyze some of the test output
 Compiling:
     cc -Wall -o tty-clock tty-clock.c -lm -lcurses
+    or, if that gives you trouble try:
+    cc -Disfinite=finite -Wall -o tty-clock tty-clock.c -lm -lcurses
 Running:
     Run on the command line as "tty-clock".  When you're tired of it,
     stop it with control-C.

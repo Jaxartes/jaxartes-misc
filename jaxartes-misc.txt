@@ -53,6 +53,9 @@ History:
 Compatibility:
     Tested on macOS and Raspbian Linux.
     Should also be fine in most modern POSIX environments.
+    Regarding the "-H" (halftone) option: On many terminals it doesn't work
+    well, so it's not the default.  But on one (VT52) "-H" works
+    while the default does not.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

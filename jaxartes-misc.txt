@@ -74,5 +74,5 @@ Running:
 History:
     Written in July 2020.
 Compatibility:
-    Tested on macOS.
+    Tested on macOS and Linux.
     Should also be fine in most modern POSIX environments.

@@ -76,3 +76,26 @@ History:
 Compatibility:
     Tested on macOS and Linux.
     Should also be fine in most modern POSIX environments.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Program: "vic20-ffractal"
+Function:
+    Displays a certain kind of fractal image on the VIC-20, a small computer
+    from the early 1980s.  Change fractals with a keypress.
+Files:
+    vic20-ffractal.asm - source code
+    vic20-ffractal.mk - Makefile (to build it)
+    vic20-ffractal.prg - pre-compiled binary
+    srec2prg.tcl - part of the build process
+Compiling, running:
+    See the top of vic20-ffractal.asm for instructions.
+History:
+    Written in May 2021.
+Compatibility:
+    Tested in VICE emulator, emulating VIC-20.
+    Most normal VIC-20 variations: NTSC and PAL, unexpanded and 3k and 8k
+    expanded.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+

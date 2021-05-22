@@ -50,6 +50,7 @@
  ;           3 -- 3k expanded VIC-20 only
  ;           8 -- 8k or 16k expanded VIC-20
  ;           99 -- auto detect and handle expansion
+ ;           64 -- assemble for Commodore 64 instead of VIC-20
  ;      99 is the most versatile but makes the program longer
  ;   config_xcut:
  ;       1 cuts transformations short, giving the wrong shape but one easier
@@ -79,6 +80,9 @@ ENDC
 IF config_exp == 8
 basic_base = $1201 ; start of BASIC on 8k or 16k expanded VIC-20
 ENDC
+IF config_exp == 64
+basic_base = $0801 ; start of BASIC on Commodore 64
+ENDC
 IF config_exp == 99
 basic_base = $1001 ; Not necessarily right.  Depending on expansions,
                    ; the program could be loaded to $1001, $0401, or $1201.
@@ -86,24 +90,48 @@ basic_base = $1001 ; Not necessarily right.  Depending on expansions,
                    ; $1001 seems good.
 ENDC
 
+IF config_exp != 64
+; VIC-20
 colors = $9600 ; color RAM
 bitmap = $1800 ; 2kB bitmap
 screen = $1600 ; screen memory
+width = 22     ; screen width of VIC-20
+height = 23    ; screen height of VIC-20
+ELSE
+; Commodore 64
+colors = $d800 ; color RAM
+bitmap = $2800 ; 2kB "bitmap" -- a character set, not using C64 bitmap mode
+screen = $2000 ; 2kB screen memory
+width = 40
+height = 25
+ENDC
 getin = $ffe4 ; "GETIN" routine in ROM to read keyboard
 basic_base_auto = $2b ; in zero page, address of start of BASIC
 tape_buffer = $33c ; tape buffer: convenient place for machine code
 
- ; scantop, scanbot:
- ; Values to write to $9005 to make the VIC chip display bitmap & text
- ; respectively.
-scantop = $d2 ; $1400 part of screen addr $1600 + $8800 mixed case ROM chars
-scanbot = $de ; $1400 part of screen addr $1600 + $1800 bitmap address
+ ; Text / bitmap "mode" switching depending on raster scan line.
+IF config_exp != 64
+; VIC-20
+vr_scan = $9004; raster scan line register
+textscan = $67 ; raster scan value to switch to "text mode"
+bitscan = $82  ; raster scan value to switch to "bitmap mode"
+vr_mode = $9005; video register controlling video memory addresses
+textmode = $d2 ; $1400 part of screen addr $1600 + $8800 mixed case ROM chars
+bitmode = $de  ; $1400 part of screen addr $1600 + $1800 bitmap address
+ELSE
+vr_scan = $d012; raster scan line register
+textscan = $d8 ; raster scan value to switch to "text mode"
+bitscan = $fb  ; raster scan value to switch to "bitmap mode"
+vr_mode = $d018; video register controlling video memory addresses
+textmode = $87 ; screen addr $2000, mixed case ROM character set (virtual) $1800
+bitmode = $8b  ; screen addr $2000, bitmap character set $2800
+ENDC
 
  ; selectNW, selectNE, selectSW:
  ; Addresses within screen memory where the current fractal "rules" are stored.
-selectNW = screen + 20 * 22 + 20
-selectNE = screen + 20 * 22 + 21
-selectSW = screen + 21 * 22 + 20
+selectNW = screen + (height - 3) * width + width - 2
+selectNE = screen + (height - 3) * width + width - 1
+selectSW = screen + (height - 2) * width + width - 2
 
  ; bm_NW, bm_NE, bm_SW:
  ; Addresses within bitmap memory where the current fractal "rules" are
@@ -155,14 +183,21 @@ basic_2 = *
     db 0
 basic_3 = *
     dw basic_4, 3
+IF config_exp != 64
     asc "FOR VIC-20"
+ELSE
+    asc "FOR COMMODORE 64"
+ENDC
     db 0
 basic_4 = *
+IF config_exp != 64
     dw basic_5, 4
     asc "(NTSC OR PAL)"
     db 0
+ENDC
 basic_5 = *
 IF config_exp != 99
+IF config_exp != 64
     dw basic_6, 5
 IF config_exp == 0
     asc "(UNEXPANDED)"
@@ -174,6 +209,7 @@ IF config_exp == 8
     asc "(8/16K EXPANDED)"
 ENDC
     db 0
+ENDC
 ENDC
 basic_6 = *
     dw basic_7, 6
@@ -280,25 +316,28 @@ ENDC ; IF config_exp == 99
     ;   A 2nd cutoff of $81 is too low for PAL, resulting in some of the
     ;   text being displayed as bitmap.  A 2nd cutoff of $82 is as high
     ;   as NTSC can handle (it doesn't get higher).
+    ;
+    ; (The above, and most of the comments, are for VIC-20.  The C-64 version
+    ; uses different addresses and cutoff values.)
 
-    lda #scanbot                ; display bitmap so you can watch it be drawn
-    sta $9005
+    lda #bitmode                ; display bitmap so you can watch it be drawn
+    sta vr_mode
     jsr init                    ; set things up
 main_loop__draw = *
     jsr draw                    ; draw the currently selected fractal
 main_loop = *
     sei                         ; suppress interrupts which cause screen glitch
-    lda $9004                   ; see what raster scan line we're on
-    cmp #$67                    ; just wait for it to get where we want it to
+    lda vr_scan                 ; see what raster scan line we're on
+    cmp #textscan               ; just wait for it to get where we want it to
     bne main_loop
-    lda #scantop                ; display text at bottom of screen
-    sta $9005
+    lda #textmode               ; display text at bottom of screen
+    sta vr_mode
 main__loop2 = *
-    lda $9004                   ; see what raster scan line we're on
-    cmp #$82                    ; wait for it to get where we want
+    lda vr_scan                 ; see what raster scan line we're on
+    cmp #bitscan                ; wait for it to get where we want
     bne main__loop2             ; branches if scan line != $82
-    lda #scanbot                ; display bitmap at top of screen
-    sta $9005
+    lda #bitmode                ; display bitmap at top of screen
+    sta vr_mode
     cli                         ; reenable interrupts
     ; Now it's a while before we get back to raster $66; during that time,
     ; see about processing input.
@@ -351,6 +390,7 @@ init = *
     ;       sets column count to 22 ($16)
     ;       sets one bit of screen address (this program uses $1600)
     ;       sets color RAM to $9600 (which is default on unexpanded VIC-20)
+IF config_exp != 64
     lda #$96
     sta $9002
     ; VIC register $9005 will be set up in main loop
@@ -359,6 +399,17 @@ IF config_badc
     lda #$99                    ; messed up colors for test/debug
 ENDC
     sta $900f
+ELSE
+    ; Commodore 64 & its VIC-II chip.
+    ; No analogue to the VIC-20's $9002 register, but *two* bytes of
+    ; color registers.
+    lda #$01                    ; white background, white border
+    sta $d020                   ; there's the border
+IF config_badc
+    lda #$02                    ; messed up color for test/debug
+ENDC
+    sta $d021                   ; there's the background
+ENDC
 
     ; screen & color memory initialization
     jsr screenfill              ; fill in fixed parts of screen memory
@@ -404,8 +455,13 @@ colorfill = *
     ; fields, where the current one is in the low half.
 
     ; Figure out the colors we're going to use.
+IF config_exp != 64
     lda $900f                   ; background & border color register
     and #$01                    ; extract border color (black/white)
+ELSE
+    lda $d020                   ; border color
+    and #$01                    ; get it down to black & white
+ENDC
     sta zptm2+1                 ; that's the low part: background at first
     eor #$01                    ; now make the foreground color
     asl a                       ; and put it in the high part
@@ -463,14 +519,28 @@ colorfill__new_run = *
 
 color_runs = *
     ; Run length encoded data for 'colorfill' to use.
+IF config_exp != 64
+    ; VIC-20
     db 3, 16, 6, 16, 6, 16, 6, 16, 6, 16, 6, 16, 6, 16, 6, 16, 6, 8, 14
     db 8, 14, 8, 14, 8, 14, 8, 14, 8, 14, 8, 6, 2, 6, 8, 6, 1, 92, 66, 0
+ELSE
+    ; C-64
+    db 12, 16, 24, 16, 24, 16, 24, 16, 24, 16, 24, 16, 24, 16, 24, 16, 24
+    db 8, 32, 8, 32, 8, 32, 8, 32, 8, 32, 8, 32, 8, 6, 2, 24, 8, 6, 1
+    db 253, 120, 0
+ENDC
 
 colorflip = *
     ; Change the color scheme.
     lda #$11                    ; black/white swap for background also border
+IF config_exp != 64
     eor $900f
     sta $900f
+ELSE
+    eor $d020                   ; flip border
+    sta $d020
+    sta $d021                   ; background too
+ENDC
     jmp colorfill               ; then do the foreground color & return
 
 bitmapclear = *
@@ -499,6 +569,8 @@ screenfill = *
     ; Top part: 0-255 in a 16x16 grid, in the middle of the first 16 of the
     ; 22-character rows.  The address of a cell in that grid is:
     ;       screen + cell + (cell / 16) * 6 + 3
+IF config_exp != 64
+    ; VIC-20 version of screen address calculation
     lda #0                      ; count the character codes & grid positions
     tay                         ; Y=0 will be convenient later
     sta zptm1                   ; in zptm1
@@ -523,27 +595,93 @@ screenfill__loop1 = *
     sta (zptm2),y               ; and write it
     inc zptm1                   ; count that byte & on to the next
     bne screenfill__loop1       ; repeat until zptm1 comes back to zero
+ELSE
+    ; C-64 version of screen address calculation.
+    ; Algorithm:
+    ;       using X to hold character cell number
+    ;       using zptm2 to hold pointer to character cell
+    ;       start:
+    ;           zptm1 := 0
+    ;           zptm2 := screen - ((width - 16) / 2)
+    ;       main loop:
+    ;           if zptm1 & 15 == 0:
+    ;               zptm2 := zptm2 + (width - 16) ; new row
+    ;           write zptm1 to memory at zptm2
+    ;           increment zptm1
+    ;           increment zptm2
+    ;           if zptm1 != 0:
+    ;               repeat main loop
+    lda #0                      ; initializing the character cell counter
+    tax                         ; that goes in X
+    tay                         ; and Y=0 can also be convenient
+    lda #LO(screen - ((width - 16) / 2)) ; initializing the pointer
+    sta zptm2
+    lda #HI(screen - ((width - 16) / 2))
+    sta zptm2+1
+screenfill__loop1 = *
+    txa                         ; look at the character cell number
+    and #$0f                    ; is it time for a new row?
+    bne screenfill__nnr         ; branch if not
+    clc                         ; new row: add (width - 16) to pointer
+    lda zptm2
+    adc #(width - 16)
+    sta zptm2
+    bcc screenfill__nnr         ; branch of that add doesn't carry
+    inc zptm2+1                 ; handle carry if it does
+screenfill__nnr = *
+    txa                         ; now write the cell number into memory
+    sta (zptm2),y
+    inx                         ; increment cell counter
+    beq screenfill__bottom      ; branch when that wraps around
+    inc zptm2                   ; increment cell pointer
+    bne screenfill__loop1       ; branch to repeat the loop (unless carrying)
+    inc zptm2+1                 ; the cell pointer increment carries
+    bne screenfill__loop1       ; now repeat the loop (branches always taken)
+ENDC
     
     ; Bottom part: Info and fixed text, by copying 66 bytes (3 rows) from
-    ; screenfill_bottom.
-    ldx #65                     ; starting with last byte
+    ; screenfill_bottom_data.
+screenfill__bottom = *
+    ldx #(3*width-1)            ; starting with last byte
 screenfill__loop2 = *
-    lda screenfill_bottom, X    ; get that byte
-    sta screen + 22*20, X       ; and store it
+    lda screenfill_bottom_data, X ; get that byte
+    sta screen + width*(height-3), X ; and store it
     dex                         ; count it off
     bpl screenfill__loop2       ; loop until X wraps around to 255
 
     rts                         ; then we're done
 
-screenfill_bottom = *
+screenfill_bottom_data = *
     ; Data for screenfill to write near the bottom of the screen.
     ; In mixed-case Commodore screen codes.
+IF config_exp != 64
+    ; VIC-20
     db $46,$2d,$06,$12,$01,$03,$14,$01,$0c,$20,$20
     db $20,$20,$20,$20,$20,$20,$20,$20,$20,$05,$08 ; "F-fractal           eh"
     db $02,$19,$20,$4a,$05,$12,$05,$0d,$19,$20,$44
     db $09,$0c,$01,$14,$15,$13,$08,$20,$20,$12,$20 ; "by Jeremy Dilatush  r "
     db $4d,$01,$19,$20,$32,$30,$32,$31,$20,$20,$20
     db $1b,$0b,$05,$19,$13,$20,$00,$41,$2d,$57,$1d ; "May 2021   [keys @A-W]"
+ELSE
+    ; C-64
+    ;   "F-fractal                    Setting: eh"
+    ;   "by Jeremy Dilatush                    r "
+    ;   "May 2021                     [keys @A-W]"
+    db $46,$2d,$06,$12,$01,$03,$14,$01,$0c,$20
+    db $20,$20,$20,$20,$20,$20,$20,$20,$20,$20
+    db $20,$20,$20,$20,$20,$20,$20,$20,$20,$53
+    db $05,$14,$14,$09,$0e,$07,$3a,$20,$05,$08
+
+    db $02,$19,$20,$4a,$05,$12,$05,$0d,$19,$20
+    db $44,$09,$0c,$01,$14,$15,$13,$08,$20,$20
+    db $20,$20,$20,$20,$20,$20,$20,$20,$20,$20
+    db $20,$20,$20,$20,$20,$20,$20,$20,$12,$20
+
+    db $4d,$01,$19,$20,$32,$30,$32,$31,$20,$20
+    db $20,$20,$20,$20,$20,$20,$20,$20,$20,$20
+    db $20,$20,$20,$20,$20,$20,$20,$20,$20,$1b
+    db $0b,$05,$19,$13,$20,$00,$41,$2d,$57,$1d
+ENDC
 
 draw = *
     ; draw: Draw the currently selected fractal, and the transformed "F"

@@ -797,6 +797,7 @@ f_images = *
     ; Eight transformed "F" images corresponding to the eight "rule" values
     ; for each quarter.  Each is 7 bytes long but they're spaced by 8 bytes
     ; so padding is needed, except at the end.
+IF config_exp != 64
     db $7e, $40, $40, $78, $40, $40, $40, $00 ; 0: untransformed
     db $7e, $48, $48, $48, $40, $40, $40, $00 ; 1: diagonally flipped
     db $7e, $02, $02, $1e, $02, $02, $02, $00 ; 2: horizontally flipped
@@ -805,6 +806,17 @@ f_images = *
     db $40, $40, $40, $48, $48, $48, $7e, $00 ; 5: diag then vert (= left rot)
     db $02, $02, $02, $1e, $02, $02, $7e, $00 ; 6: horiz then vert (= dbl rot)
     db $02, $02, $02, $12, $12, $12, $7e      ; 7: diag, horiz, vert (= ?)
+ELSE
+    ; Horizontally thickened as preferred on Commodore 64
+    db $7f, $60, $60, $7c, $60, $60, $60, $00 ; 0: untransformed
+    db $7f, $6c, $6c, $6c, $60, $60, $60, $00 ; 1: diagonally flipped
+    db $7f, $03, $03, $1f, $03, $03, $03, $00 ; 2: horizontally flipped
+    db $7f, $1b, $1b, $1b, $03, $03, $03, $00 ; 3: diag then horiz (= right rot)
+    db $60, $60, $60, $7c, $60, $60, $7f, $00 ; 4: vertically flipped
+    db $60, $60, $60, $6c, $6c, $6c, $7f, $00 ; 5: diag then vert (= left rot)
+    db $03, $03, $03, $1f, $03, $03, $7f, $00 ; 6: horiz then vert (= dbl rot)
+    db $03, $03, $03, $1b, $1b, $1b, $7f      ; 7: diag, horiz, vert (= ?)
+ENDC
 
 draw_rec = *
     ; Recursive fractal drawing routine.  Takes info from the "coordinate stack"

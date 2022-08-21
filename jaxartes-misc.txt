@@ -1,9 +1,28 @@
 Introduction
+
 'jaxartes-misc' is a collection of open source programs.  Most are
 command line utilities by Jeremy Dilatush published under the BSD license
 for Linux and other POSIX-compatible systems.
 This file, "jaxartes-misc.txt" provides basic documentation about each
 one.  See the individual files for more details.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Program: "lx_timer_test_mod"
+Function:
+    Tests some timers in the Linux kernel.
+Files:
+    lx_timer_test_mod/lx_timer_test_mod.c - source code
+    lx_timer_test_mod/Makefile - to build it
+Compiling:
+    cd lx_timer_test_mod
+    make
+Running:
+    sudo insmod lx_timer_test_mod.ko
+    dmesg
+History:
+    Written and published 20 August 2022.
+Compatibility:
+    Linux only. Tested on Raspbian with 5.10.103-v7+ kernel.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Program: "timedumper"

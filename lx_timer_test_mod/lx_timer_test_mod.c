@@ -139,8 +139,6 @@ static int lx_timer_test_main(void * unused)
         /* When did that end? */
         tafter = ktime_get();
 
-        /* Why is tafter sometimes less than tbefore? */
-
         /* If we're supposed to exit, do so */
         if (kthread_should_stop()) {
             printk(KERN_ERR "lx_timer_test_main() exiting");

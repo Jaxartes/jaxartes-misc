@@ -40,6 +40,24 @@ History:
 Compatibility:
     Linux, macOS and other POSIX compatible systems.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Program: "tcphammer"
+Function:
+    Test program that makes and breaks a lot of TCP connections to an
+    ECHO (RFC 862) protocol server (e.g. "stdserve").
+Files:
+    tcphammer.c         Source code
+    tcphammer-input-1   Example input file
+Compiling:
+    cc -Wall -g -o tcphammer tcphammer.c -lm -lpthread
+Running:
+    tcphammer < tcphammer-input-1
+History:
+    Written to test some weird failures in the BGP protocol, that seem
+    to have to do with TCP, not BGP itself.
+Compatibility:
+    Works on Linux. Should work on other POSIX systems. Tried on macOS
+    and it has some trouble.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Program: "timedumper"
 Function:
     Dumps some stuff to standard output continuously.  Mostly it's just

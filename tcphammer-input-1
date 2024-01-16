@@ -1,0 +1,10 @@
+# This is input for tcphammer. Edit to change its behavior.
+# See usage() in tcphammer.c for more ideas and explanation.
+kverbose
+kopendata
+c50/127.0.0.1/11011
+#c10/::1/22022
+#i5.0
+i1.0
+s5/0/4
+

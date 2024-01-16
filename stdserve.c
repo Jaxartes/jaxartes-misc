@@ -16,9 +16,10 @@
  * starting a new one.  That should allow a single node to handle more
  * connections than otherwise.
  *
- * Written in 2011, and never quite finished. It's not something you'd want
- * to run on an important production machine. But for testing it might
- * be good enough. I've used it a few times and it's been ok.
+ * Written in 2011, and never quite finished. Don't run on an important
+ * production machine, or anywhere this software's bugs might
+ * unacceptably impact security or utility. But for tests and experiments
+ * it might be good enough.
  */
 /*
  * stdserve.c - Jeremy Dilatush

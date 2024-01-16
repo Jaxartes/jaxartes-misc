@@ -28,13 +28,13 @@ Compatibility:
 Program: "stdserve"
 Function:
     Server for some unimportant internet standard protocols, e.g. ECHO
-    (RFC 862). For use in testing.
+    (RFC 862). For use in testing, not in production
 Files:
     stdserve.c
 Compiling:
     cc -Wall -o stdserve stdserve.c
 Running:
-    stdserve echo 127.0.0.1/7
+    stdserve echo 127.0.0.1/11011
 History:
     Written in 2011, published in 2024.
 Compatibility:
@@ -43,7 +43,8 @@ Compatibility:
 Program: "tcphammer"
 Function:
     Test program that makes and breaks a lot of TCP connections to an
-    ECHO (RFC 862) protocol server (e.g. "stdserve").
+    ECHO (RFC 862) protocol server (e.g. "stdserve"). For use in testing,
+    not in production.
 Files:
     tcphammer.c         Source code
     tcphammer-input-1   Example input file

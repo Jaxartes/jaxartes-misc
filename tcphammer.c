@@ -11,6 +11,8 @@
  * but it's just for testing.
  *
  * Since it's just for testing, don't run on important production machines.
+ * Or anywhere the bugs it no doubt has might unacceptably impact security
+ * or utility.
  *
  * Has some kind of problem on macOS (and probably FreeBSD) where it gets
  * EPIPE a lot. The problem is not seen on Linux.

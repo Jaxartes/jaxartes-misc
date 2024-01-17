@@ -86,6 +86,7 @@ void usage(void)
           "        or last (4); and selects that fraction of connections.\n"
           "    kopendata -- send data immediately after open\n"
           "    kclosedata -- send data immediately before close\n"
+          "    ksilentdata -- don't report successful data\n"
           "    kverbose -- detailed reporting for debug purposes\n"
           "    p...\n"
           "        Relative probability of the various actions.\n"
@@ -159,6 +160,7 @@ int *scale_choices;             /* scale control: which ones to choose */
 int scale_nchoices;             /* size of scale_choices */
 const int rand_limit = 5000;    /* max value of scale_nrand */
 int opt_opendata, opt_closedata, opt_verbose; /* option flags */
+int opt_silentdata;             /* more option flags */
 float prob_data = 15;           /* probability of operation: data */
 float prob_open = 5;            /* probability of operation: open */
 float prob_close = 5;           /* probability of operation: close */
@@ -438,6 +440,8 @@ int parse_config(FILE *fp)
                     opt_opendata = 1;
                 } else if (!strcasecmp(line + 1, "closedata")) {
                     opt_closedata = 1;
+                } else if (!strcasecmp(line + 1, "silentdata")) {
+                    opt_silentdata = 1;
                 } else if (!strcasecmp(line + 1, "verbose")) {
                     opt_verbose = 1;
                 } else {
@@ -692,20 +696,26 @@ void *cslot_main(void *vp)
         if (cmd == NEGCHAR('o')) { opstr = "open"; }
         if (cmd == NEGCHAR('c')) { opstr = "close"; }
         if (cmd == NEGCHAR('d')) { opstr = "data"; }
-        slot->cs_cmd = snprintf((char *)slot->cs_cbuf, sizeof(slot->cs_cbuf),
-                                "%d,%s,%u.%03u,%u.%03u,%s,%s,%s,%s,%s,\"%s\"",
-                                slot->cs_num,
-                                timediff(&tstart, &tend, tbuf1, sizeof(tbuf1)),
-                                (unsigned)tstart.tv_sec,
-                                (unsigned)(tstart.tv_usec / 1000),
-                                (unsigned)tend.tv_sec,
-                                (unsigned)(tend.tv_usec / 1000),
-                                timeshow(&tstart, tbuf2, sizeof(tbuf2)),
-                                timeshow(&tend, tbuf3, sizeof(tbuf3)),
-                                opstr,
-                                slot->cs_name,
-                                err ? "err" : "ok",
-                                msg);
+        if (opt_silentdata && cmd == NEGCHAR('d') && !err) {
+            /* user doesn't want to know every time we exchange a few bytes */
+            slot->cs_cmd = 0;
+            slot->cs_cbuf[0] = '\0';
+        } else {
+            slot->cs_cmd = snprintf((char *)slot->cs_cbuf, sizeof(slot->cs_cbuf),
+                                    "%d,%s,%u.%03u,%u.%03u,%s,%s,%s,%s,%s,\"%s\"",
+                                    slot->cs_num,
+                                    timediff(&tstart, &tend, tbuf1, sizeof(tbuf1)),
+                                    (unsigned)tstart.tv_sec,
+                                    (unsigned)(tstart.tv_usec / 1000),
+                                    (unsigned)tend.tv_sec,
+                                    (unsigned)(tend.tv_usec / 1000),
+                                    timeshow(&tstart, tbuf2, sizeof(tbuf2)),
+                                    timeshow(&tend, tbuf3, sizeof(tbuf3)),
+                                    opstr,
+                                    slot->cs_name,
+                                    err ? "err" : "ok",
+                                    msg);
+        }
         if (slot->cs_cmd >= sizeof(slot->cs_cbuf)) {
             slot->cs_cmd = sizeof(slot->cs_cbuf) - 1;
         }
